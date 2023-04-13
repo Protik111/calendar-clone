@@ -1,13 +1,14 @@
+import { differenceInDays, endOfMonth, format, startOfMonth, sub } from "date-fns";
 import Cell from "./Cells";
 
 const daysOfWeek = [
-    "Sat",
     "Sun",
     "Mon",
     "Tues",
     "Wed",
     "Thur",
     "Fri",
+    "Sat",
 ];
 
 interface Props {
@@ -15,14 +16,22 @@ interface Props {
     setCurrentDate?: ( currentDate: Date) => void;
 }
 
-const Calendar: React.FC<Props> = ({ currentDate, setCurrentDate }) => {
-    console.log('currentDate', currentDate);
+const Calendar: React.FC<Props> = ({ currentDate = new Date(), setCurrentDate }) => {
+    const startDate = startOfMonth(currentDate);
+    const endDate = endOfMonth(currentDate);
+    const totalDays = differenceInDays(endDate,startDate) + 1;
+
+    const prefixDays =  startDate.getDay();
+    const suffixDays = 6 - endDate.getDay();
+
+    const prevMonth = () => setCurrentDate && setCurrentDate(sub(currentDate, { months: 1 }))
+
     return (
         <div className="w-[400px] border-t border-l">
             <div className="grid grid-cols-7 items-center justify-center text-center">
                 <Cell>{"<<"}</Cell>
-                <Cell>{"<"}</Cell>
-                <Cell className="col-span-3">August 15</Cell>
+                <Cell onClick={prevMonth}>{"<"}</Cell>
+                <Cell className="col-span-3">{format(currentDate, "LLLL yyyy")}</Cell>
                 <Cell>{">"}</Cell>
                 <Cell>{">>"}</Cell>
 
@@ -31,37 +40,22 @@ const Calendar: React.FC<Props> = ({ currentDate, setCurrentDate }) => {
                         {item}
                     </Cell>)
                 }
-                <Cell>1</Cell>
-                <Cell>2</Cell>
-                <Cell>3</Cell>
-                <Cell>4</Cell>
-                <Cell>5</Cell>
-                <Cell>6</Cell>
-                <Cell>7</Cell>
-                <Cell>8</Cell>
-                <Cell>9</Cell>
-                <Cell>10</Cell>
-                <Cell>11</Cell>
-                <Cell>12</Cell>
-                <Cell>13</Cell>
-                <Cell>14</Cell>
-                <Cell>15</Cell>
-                <Cell>16</Cell>
-                <Cell>17</Cell>
-                <Cell>18</Cell>
-                <Cell>19</Cell>
-                <Cell>20</Cell>
-                <Cell>21</Cell>
-                <Cell>22</Cell>
-                <Cell>23</Cell>
-                <Cell>24</Cell>
-                <Cell>25</Cell>
-                <Cell>26</Cell>
-                <Cell>27</Cell>
-                <Cell>28</Cell>
-                <Cell>29</Cell>
-                <Cell>30</Cell>
-                <Cell>31</Cell>
+
+                {/* giving empty box depending on which day start at the very beginning of the month */}
+                {
+                    Array.from({ length: prefixDays }).map((item, i) => <Cell key={i}></Cell>)
+                }
+                
+                {
+                    Array.from({ length: totalDays }).map((item, i) => {
+                         const date = i+1;
+                         return <Cell key={i}>{date}</Cell>
+                    })
+                }
+
+                {
+                    Array.from({ length: suffixDays }).map((item, i) => <Cell key={i}></Cell>)
+                }
             </div>
         </div>
     );
