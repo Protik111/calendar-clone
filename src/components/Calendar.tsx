@@ -1,4 +1,4 @@
-import { differenceInDays, endOfMonth, format, startOfMonth, sub } from "date-fns";
+import { add, differenceInDays, endOfMonth, format, setDate, startOfMonth, sub } from "date-fns";
 import Cell from "./Cells";
 
 const daysOfWeek = [
@@ -13,7 +13,7 @@ const daysOfWeek = [
 
 interface Props {
     currentDate?: Date;
-    setCurrentDate?: ( currentDate: Date) => void;
+    setCurrentDate?: ( currentDate: Date ) => void;
 }
 
 const Calendar: React.FC<Props> = ({ currentDate = new Date(), setCurrentDate }) => {
@@ -24,16 +24,25 @@ const Calendar: React.FC<Props> = ({ currentDate = new Date(), setCurrentDate })
     const prefixDays =  startDate.getDay();
     const suffixDays = 6 - endDate.getDay();
 
-    const prevMonth = () => setCurrentDate && setCurrentDate(sub(currentDate, { months: 1 }))
+    const prevMonth = () => setCurrentDate && setCurrentDate(sub(currentDate, { months: 1 }));
+    const nextMonth = () => setCurrentDate && setCurrentDate(add(currentDate, { months: 1 }));
+
+    const prevYear = () => setCurrentDate && setCurrentDate(sub(currentDate, { years: 1 }));
+    const nextYear = () => setCurrentDate && setCurrentDate(add(currentDate, { years: 1 }));
+
+    const handleDate = (index: number) => {
+        const dateObj = setDate(currentDate, index);
+        setCurrentDate && setCurrentDate(dateObj);
+    }
 
     return (
         <div className="w-[400px] border-t border-l">
             <div className="grid grid-cols-7 items-center justify-center text-center">
-                <Cell>{"<<"}</Cell>
+                <Cell onClick={prevYear}>{"<<"}</Cell>
                 <Cell onClick={prevMonth}>{"<"}</Cell>
                 <Cell className="col-span-3">{format(currentDate, "LLLL yyyy")}</Cell>
-                <Cell>{">"}</Cell>
-                <Cell>{">>"}</Cell>
+                <Cell onClick={nextMonth}>{">"}</Cell>
+                <Cell onClick={nextYear}>{">>"}</Cell>
 
                 {
                     daysOfWeek?.map((item, i) => <Cell key={i}>
@@ -49,7 +58,8 @@ const Calendar: React.FC<Props> = ({ currentDate = new Date(), setCurrentDate })
                 {
                     Array.from({ length: totalDays }).map((item, i) => {
                          const date = i+1;
-                         return <Cell key={i}>{date}</Cell>
+                         const isCurrentDate = date === currentDate.getDate();
+                         return <Cell isActive={isCurrentDate} onClick={() => handleDate(date)} key={i}>{date}</Cell>
                     })
                 }
 
